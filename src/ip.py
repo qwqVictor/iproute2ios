@@ -2,16 +2,17 @@
 # encoding: utf8
 
 """
-  iproute2mac
-  CLI wrapper for basic network utilites on Mac OS X.
-  Homepage: https://github.com/brona/iproute2mac
+  iproute2ios
+  CLI wrapper for basic network utilites on jailbroken iOS.
+  Homepage: https://github.com/qwqVictor/iproute2ios
+  Original Author: Bronislav Robenek
 
   The MIT License (MIT)
-  Copyright (c) 2015 Bronislav Robenek <brona@robenek.me>
+  Copyright (c) 2019 Victor Huang <i@qwq.ren>
 """
 
 import sys
-import commands
+import subprocess
 import re
 import string
 import random
@@ -19,7 +20,7 @@ import types
 import socket
 
 # Version
-VERSION = '1.2.2'
+VERSION = '1.2.3'
 
 # Utilities
 SUDO = '/usr/bin/sudo'
@@ -36,10 +37,10 @@ def perror(*args):
     sys.stderr.write("\n")
 
 def execute_cmd(cmd):
-  print 'Executing: %s' % cmd
-  status, output = commands.getstatusoutput(cmd)
-  if status == 0:  # unix/linux commands 0 true, 1 false
-    print output
+  print('Executing: %s' % cmd)
+  status, output = subprocess.getstatusoutput(cmd)
+  if status == 0:  # unix/linux subprocess 0 true, 1 false
+    print(output)
     return True
   else:
     perror(output)
@@ -85,9 +86,10 @@ def do_help():
   perror("where  OBJECT := { link | addr | route | neigh }")
   perror("       OPTIONS := { -4 | -6 }")
   perror("")
-  perror("iproute2mac")
-  perror("Homepage: https://github.com/brona/iproute2mac")
-  perror("This is CLI wrapper for basic network utilities on Mac OS X inspired with iproute2 on Linux systems.")
+  perror("iproute2ios")
+  perror("Homepage: https://github.com/qwqVictor/iproute2ios")
+  perror("Original Author: Bronislav Robenek")
+  perror("This is CLI wrapper for basic network utilities on jailbroken iOS inspired with iproute2 on Linux systems.")
   perror("Provided functionality is limited and command output is not fully compatible with iproute2.")
   perror("For advanced usage use netstat, ifconfig, ndp, arp, route and networksetup directly.")
   exit(255)
@@ -142,9 +144,9 @@ def do_route(argv,af):
 
 def do_route_list(af):
   if af==6:
-    status,res = commands.getstatusoutput(NETSTAT + " -nr -f inet6 2>/dev/null")
+    status,res = subprocess.getstatusoutput(NETSTAT + " -nr -f inet6 2>/dev/null")
   else:
-    status,res = commands.getstatusoutput(NETSTAT + " -nr -f inet 2>/dev/null")
+    status,res = subprocess.getstatusoutput(NETSTAT + " -nr -f inet 2>/dev/null")
   if status:
       perror(res)
       return False
@@ -161,9 +163,9 @@ def do_route_list(af):
       if flags.find('W') != -1 or flags.find('H') != -1:
         continue
       if re.match("link.+",gw):
-        print target + ' dev ' + dev + '  scope link'
+        print(target + ' dev ' + dev + '  scope link')
       else:
-        print target + ' via ' + gw + ' dev ' + dev
+        print(target + ' via ' + gw + ' dev ' + dev)
     else:
       target = ra[0]
       gw     = ra[1]
@@ -172,7 +174,7 @@ def do_route_list(af):
       if flags.find('W') != -1 or flags.find('H') != -1:
         continue
       if target == 'default':
-        print 'default via ' + gw + ' dev ' + dev
+        print('default via ' + gw + ' dev ' + dev)
       else:
         dots=target.count('.')
         if target.find('/') == -1:
@@ -189,9 +191,9 @@ def do_route_list(af):
           addr = addr + '.0.0.0'
 
         if re.match("link.+",gw):
-          print addr + '/' + str(netmask)+ ' dev ' + dev + '  scope link'
+          print(addr + '/' + str(netmask)+ ' dev ' + dev + '  scope link')
         else:
-          print addr + '/' + str(netmask) + ' via ' + gw + ' dev ' + dev
+          print(addr + '/' + str(netmask) + ' via ' + gw + ' dev ' + dev)
   return True
 
 def do_route_add(argv,af):
@@ -226,7 +228,7 @@ def do_route_get(argv,af):
   else:
     family=socket.AF_INET
 
-  status,res = commands.getstatusoutput(ROUTE + " -n get " + inet + target)
+  status,res = subprocess.getstatusoutput(ROUTE + " -n get " + inet + target)
   if status: # unix status or not in table
     perror(res)
     return False
@@ -250,9 +252,9 @@ def do_route_get(argv,af):
     src = ""
 
   if via=="":
-    print route_to + " dev " + dev + src
+    print(route_to + " dev " + dev + src)
   else:
-    print route_to + " via " + via + " dev " + dev + src
+    print(route_to + " via " + via + " dev " + dev + src)
   return True
 
 # Addr Module
@@ -293,7 +295,7 @@ def do_addr_show(argv,af):
   else:
     param="-a"
 
-  status,res = commands.getstatusoutput(IFCONFIG + " " + param + " 2>/dev/null")
+  status,res = subprocess.getstatusoutput(IFCONFIG + " " + param + " 2>/dev/null")
   if status:
     if res == "": perror(param + ' not found')
     else: perror(res)
@@ -331,7 +333,7 @@ def do_addr_show(argv,af):
 
   if address_count > 0:
     output += buff
-  print output.rstrip()
+  print(output.rstrip())
   return True
 
 def do_addr_add(argv,af):
@@ -397,14 +399,14 @@ def do_link_show(argv,af):
   else:
     param="-a"
 
-  status,res = commands.getstatusoutput(IFCONFIG + " " + param + " 2>/dev/null")
+  status,res = subprocess.getstatusoutput(IFCONFIG + " " + param + " 2>/dev/null")
   if status: # unix status
     if res == "": perror(param + ' not found')
     else: perror(res)
     return False
   for r in res.split('\n'):
     if not re.match('\s+inet.+',r):
-      print r
+      print(r)
   return True
 
 def do_link_set(argv,af):
@@ -430,7 +432,7 @@ def do_link_set(argv,af):
         if addr in ['random','rand']:
           addr=randomMAC()
         elif addr=='factory':
-          (status,res)=commands.getstatusoutput(NETWORKSETUP + " -listallhardwareports")
+          (status,res)=subprocess.getstatusoutput(NETWORKSETUP + " -listallhardwareports")
           if status != 0:
             return False
           details=re.findall('^(?:Device|Ethernet Address): (.+)$', res, re.MULTILINE)
@@ -453,7 +455,7 @@ def do_neigh(argv,af):
     idev = argv[2]
   if (not argv) or (argv[0] in ['show','sh','s','list','lst','ls']):
     if af != 4:
-      (status,res) = commands.getstatusoutput(NDP + " -an 2>/dev/null")
+      (status,res) = subprocess.getstatusoutput(NDP + " -an 2>/dev/null")
       if status != 0:
         return False
       res=res.split('\n')
@@ -469,14 +471,14 @@ def do_neigh(argv,af):
         else:
           stat='INCOMPLETE'
         if l2a=='(incomplete)' and stat!='REACHABLE':
-          print l3a + ' dev ' + dev + ' INCOMPLETE'
+          print(l3a + ' dev ' + dev + ' INCOMPLETE')
         else:
-          print l3a + ' dev ' + dev + ' lladdr ' + l2a + ' ' + stat
+          print(l3a + ' dev ' + dev + ' lladdr ' + l2a + ' ' + stat)
     if af != 6:
       if idev:
-        (status,res)=commands.getstatusoutput(ARP + " -anli " + idev +" 2>/dev/null")
+        (status,res)=subprocess.getstatusoutput(ARP + " -anli " + idev +" 2>/dev/null")
       else:
-        (status,res)=commands.getstatusoutput(ARP + " -anl 2>/dev/null")
+        (status,res)=subprocess.getstatusoutput(ARP + " -anl 2>/dev/null")
       if status != 0:
         return False
       res=res.split('\n')
@@ -487,9 +489,9 @@ def do_neigh(argv,af):
         l2a=ra[1]
         dev=ra[4]
         if l2a=='(incomplete)':
-          print l3a + ' dev ' + dev + ' INCOMPLETE'
+          print(l3a + ' dev ' + dev + ' INCOMPLETE')
         else:
-          print l3a + ' dev ' + dev + ' lladdr ' + l2a + ' REACHABLE'
+          print(l3a + ' dev ' + dev + ' lladdr ' + l2a + ' REACHABLE')
   # TODO: delete, add
   elif argv[0] in ['f', 'fl', 'flush']:
     if not idev:
@@ -505,7 +507,7 @@ def do_neigh(argv,af):
 
   return True
 
-# Match iproute2 commands
+# Match iproute2 subprocess
 # https://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git/tree/ip/ip.c#n75
 cmds = [
   [ "address",    do_addr ],
@@ -536,7 +538,7 @@ def main(argv):
     return False
 
   if argv[0] == '-V':
-    print "iproute2mac, v" + VERSION
+    print("iproute2ios, v" + VERSION)
     exit(0)
 
   if argv[0] == 'help':
