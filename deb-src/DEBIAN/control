@@ -1,0 +1,17 @@
+Package: tech.imvictor.iproute2ios
+Priority: optional
+Name: iproute2 for iOS
+Version: 1.2.3
+Section: Networking
+Architecture: iphoneos-arm
+Depends: python3 | com.mc.python3, sudo, network-cmds
+Pre-Depends: dpkg
+Maintainer: Victor Huang <i@qwq.ren>
+Homepage: https://github.com/qwqVictor/iproute2ios
+Tag: purpose::console
+Description: CLI wrapper for basic network utilities on jailbroken iOS inspired with iproute2 on Linux systems - `ip` command.
+	This utility was written by [brona](https://github.com/brona/), and this repository is an iOS port of iproute2mac.
+	Provided functionality is limited and command output is not fully compatible with [iproute2](http://www.policyrouting.org/iproute2.doc.html).
+	Goal of this project is to make basic network configuration/debug tasks on jailbroken iOS easy for admins who already use Linux systems.
+	For advanced usage use `netstat`, `ifconfig`, `ndp`, `arp`, `route` and directly.
+	It depends on sudo, Network Commands and Python 3 (MCApollo version can work).
