@@ -26,10 +26,9 @@ VERSION = '1.2.3'
 SUDO = '/usr/bin/sudo'
 IFCONFIG = '/sbin/ifconfig'
 ROUTE = '/sbin/route'
-NETSTAT = '/usr/sbin/netstat'
+NETSTAT = '/sbin/netstat'
 NDP = '/usr/sbin/ndp'
 ARP = '/usr/sbin/arp'
-NETWORKSETUP = '/usr/sbin/networksetup'
 
 # Helper functions
 def perror(*args):
@@ -432,11 +431,7 @@ def do_link_set(argv,af):
         if addr in ['random','rand']:
           addr=randomMAC()
         elif addr=='factory':
-          (status,res)=subprocess.getstatusoutput(NETWORKSETUP + " -listallhardwareports")
-          if status != 0:
             return False
-          details=re.findall('^(?:Device|Ethernet Address): (.+)$', res, re.MULTILINE)
-          addr=details[details.index(dev)+1]
         if not execute_cmd(SUDO + " " + IFCONFIG + " " + dev + " lladdr " + addr): return False
       elif arg=='mtu':
         mtu=int(args.next())
